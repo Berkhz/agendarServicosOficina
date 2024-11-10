@@ -35,6 +35,12 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/form');
               },
             ),
+            ListTile(
+              title: const Text('Adicionar Cliente', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pushNamed(context, '/add_client');
+              },
+            ),
           ],
         ),
       ),

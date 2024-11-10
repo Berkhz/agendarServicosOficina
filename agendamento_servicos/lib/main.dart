@@ -1,7 +1,8 @@
+import 'package:agendamento_servicos/screens/Forms/cliente_form_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'screens/servico_form_screen.dart';
-import 'screens/list_screen.dart';
+import 'screens/Forms/servico_form_screen.dart';
+import 'screens/Lists/list_screen.dart';
 import '../models/servico.dart';
 
 void main() {
@@ -26,11 +27,14 @@ class MyApp extends StatelessWidget {
       home: const HomeScreen(),
       routes: {
         '/form': (context) {
-          return ServicoFormScreen(servico: Servico(id: 0, tipo: '', data: '', hora: '', status: '', clienteId: 0, empresaId: 0));
+          return const ServicoFormScreen();
         },
         '/list': (context) {
           return const ListScreen();
         },
+        '/add_client': (context) {
+          return const ClienteFormScreen();
+        }
       },
     );
   }

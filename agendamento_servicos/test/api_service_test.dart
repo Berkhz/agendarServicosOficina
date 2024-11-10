@@ -18,23 +18,26 @@ void main() {
     });
 
     test('Testando o GET de serviços', () async {
-      // Mock da resposta da requisição GET
-      when(mockClient.get(Uri.parse('http://192.168.237.90:3000/servicos')))
-          .thenAnswer(
-            (_) async => http.Response(
-          json.encode([
-            {'id': 1, 'tipo': 'Troca de óleo', 'data': '2024-11-20', 'hora': '10:00', 'status': 'agendado', 'clienteId': 1}
-          ]),
-          200,
-        ),
-      );
+      when(mockClient.get(any as Uri)).thenAnswer((_) async => http.Response(
+        json.encode([
+          {
+            'id': 1,
+            'tipo': 'Troca de óleo',
+            'data': '2024-11-20',
+            'hora': '10:00',
+            'status': 'agendado',
+            'clienteId': 1
+          }
+        ]),
+        200,
+      ));
 
       final services = await apiService.getServicos();
 
-      // Verifica se o serviço retornado não está vazio e tem os valores corretos
       expect(services.isNotEmpty, true);
       expect(services[0].tipo, 'Troca de óleo');
       expect(services[0].id, 1);
+      expect(services[0].clienteId, 1);
     });
 
     test('Testando o POST de serviço', () async {
@@ -45,25 +48,28 @@ void main() {
         hora: '11:00',
         status: 'agendado',
         clienteId: 1,
-        empresaId: 1,  // Incluindo o empresaId aqui
+        empresaId: 1,
       );
 
-      // Mock da resposta da requisição POST
       when(mockClient.post(
-        Uri.parse('http://192.168.237.90:3000/servicos'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(servico.toJson()),
-      )).thenAnswer(
-            (_) async => http.Response('{"id": 2}', 201),
-      );
+        any as Uri,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response('{"id": 2}', 201));
 
       await apiService.addServico(servico);
 
-      // Verifica se o método post foi chamado corretamente com os parâmetros esperados
       verify(mockClient.post(
         Uri.parse('http://192.168.237.90:3000/servicos'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(servico.toJson()),
+        body: json.encode({
+          'id': 2,
+          'tipo': 'Troca de Pneu',
+          'data': '2024-11-20',
+          'hora': '11:00',
+          'status': 'agendado',
+          'clienteId': 1,
+        }),
       )).called(1);
     });
   });

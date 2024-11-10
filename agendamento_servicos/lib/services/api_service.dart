@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/servico.dart';
-import '../models/empresa.dart';
 import '../models/cliente.dart';
 
 class ApiService {
@@ -14,7 +13,7 @@ class ApiService {
     final response = await client.get(Uri.parse('$baseUrl/servicos'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
-      print('Serviços recebidos: $data'); // Adicionando log para verificar os dados
+      print('Serviços recebidos: $data');
       return data.map((json) => Servico.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load services');
@@ -23,10 +22,16 @@ class ApiService {
 
   Future<void> addServico(Servico servico) async {
     try {
+      final Map<String, dynamic> servicoJson = servico.toJson();
+
+      if (servicoJson['empresaId'] == null) {
+        servicoJson.remove('empresaId');
+      }
+
       final response = await client.post(
         Uri.parse('$baseUrl/servicos'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(servico.toJson()),
+        body: json.encode(servicoJson),
       );
 
       if (response.statusCode != 201) {
@@ -57,61 +62,48 @@ class ApiService {
     return response.statusCode == 200;
   }
 
-  Future<void> addEmpresa(Empresa empresa) async {
+  Future<bool> addCliente(Cliente cliente) async {
     try {
-      final response = await client.post(
-        Uri.parse('$baseUrl/empresas'),
+      final response = await http.post(
+        Uri.parse('$baseUrl/clientes'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(empresa.toJson()),
+        body: json.encode({
+          'nome': cliente.nome,
+          'telefone': cliente.telefone,
+          'email': cliente.email,
+          'empresaId': Cliente.empresaId,
+        }),
       );
 
-      if (response.statusCode != 201) {
-        throw Exception('Failed to add company: ${response.statusCode}');
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        throw Exception('Erro ao adicionar cliente: ${response.statusCode}');
       }
-    } catch (error) {
-      throw Exception('Failed to add company: $error');
-    }
-  }
-
-  Future<bool> addCliente(Cliente cliente) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/clientes'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'nome': cliente.nome,
-        'telefone': cliente.telefone,
-        'email': cliente.email,
-        'empresaId': cliente.empresaId,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      return true;
-    } else {
+    } catch (e) {
+      print('Erro ao fazer requisição: $e');
       return false;
     }
   }
 
-  Future<List<Empresa>> getEmpresas() async {
-    final response = await http.get(Uri.parse('$baseUrl/empresas'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Empresa.fromJson(json)).toList();
-    } else {
-      throw Exception('Falha ao carregar empresas');
-    }
-  }
-
   Future<List<Cliente>> getClientes() async {
-    final response = await http.get(Uri.parse('$baseUrl/clientes'));
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/clientes'));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Cliente.fromJson(json)).toList();
-    } else {
-      throw Exception('Falha ao carregar clientes');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        return data.map((json) {
+          json['id'] = int.tryParse(json['id'].toString()) ?? 0;
+          json['empresaId'] = int.tryParse(json['empresaId'].toString()) ?? 1;
+          return Cliente.fromJson(json);
+        }).toList();
+      } else {
+        throw Exception('Falha ao carregar clientes');
+      }
+    } catch (e) {
+      print('Erro ao carregar clientes: $e');
+      throw Exception('Erro ao carregar clientes');
     }
   }
-
 }

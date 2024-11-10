@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/servico.dart';
-import '../services/api_service.dart';
-import 'servico_form_screen.dart';
+import '../../models/servico.dart';
+import '../../services/api_service.dart';
+import '../Forms/edit_servico_form_screen.dart';
+import '../Forms/servico_form_screen.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -42,7 +43,7 @@ class _ListScreenState extends State<ListScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ServicoFormScreen(servico: servico),
+        builder: (context) => EditFormScreen(servico: servico),
       ),
     );
 

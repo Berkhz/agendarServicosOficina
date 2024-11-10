@@ -1,19 +1,23 @@
 class Cliente {
-  final int id;
+  final int? id;
   final String nome;
   final String telefone;
   final String email;
-  final int empresaId;
+  static const int empresaId = 1;
 
-  Cliente({required this.id, required this.nome, required this.telefone, required this.email, required this.empresaId});
+  Cliente({
+    this.id,
+    required this.nome,
+    required this.telefone,
+    required this.email,
+  });
 
   factory Cliente.fromJson(Map<String, dynamic> json) {
     return Cliente(
       id: json['id'],
       nome: json['nome'],
-      telefone: json['telefone'],
-      email: json['email'],
-      empresaId: json['empresaId'],
+      telefone: json['telefone'] ?? '',
+      email: json['email'] ?? '',
     );
   }
 

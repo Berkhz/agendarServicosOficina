@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/servico.dart';
-import '../models/cliente.dart';
-import '../models/empresa.dart';
-import '../services/api_service.dart';
+import '../../models/servico.dart';
+import '../../models/cliente.dart';
+import '../../services/api_service.dart';
 
 class EditFormScreen extends StatefulWidget {
   final Servico servico;
@@ -20,9 +19,7 @@ class _EditFormScreenState extends State<EditFormScreen> {
   final TextEditingController dataController = TextEditingController();
   final TextEditingController horaController = TextEditingController();
 
-  List<Empresa> empresas = [];
   List<Cliente> clientes = [];
-  Empresa? selectedEmpresa;
   Cliente? selectedCliente;
 
   @override
@@ -32,15 +29,7 @@ class _EditFormScreenState extends State<EditFormScreen> {
     dataController.text = widget.servico.data;
     horaController.text = widget.servico.hora;
 
-    _loadEmpresas();
     _loadClientes();
-  }
-
-  void _loadEmpresas() async {
-    final response = await apiService.getEmpresas();
-    setState(() {
-      empresas = response;
-    });
   }
 
   void _loadClientes() async {
@@ -51,18 +40,25 @@ class _EditFormScreenState extends State<EditFormScreen> {
   }
 
   void _saveForm() async {
-    if (_formKey.currentState!.validate()) {
-      final updatedServico = Servico(
-        id: widget.servico.id,
+    if (_formKey.currentState!.validate() && selectedCliente != null) {
+      final novoServico = Servico(
+        id: widget.servico.id ?? 0,
         tipo: tipoController.text,
         data: dataController.text,
         hora: horaController.text,
-        status: widget.servico.status,
-        clienteId: selectedCliente?.id ?? widget.servico.clienteId,
-        empresaId: selectedEmpresa?.id ?? widget.servico.empresaId,
+        status: 'agendado',
+        clienteId: selectedCliente!.id ?? 0,
+        empresaId: 1,
       );
-      await apiService.updateServico(updatedServico);
-      Navigator.pop(context, true);
+
+      try {
+        await apiService.updateServico(novoServico);
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar serviço: $e')),
+        );
+      }
     }
   }
 
@@ -119,30 +115,9 @@ class _EditFormScreenState extends State<EditFormScreen> {
                       filled: true,
                       fillColor: Colors.black12,
                     ),
-                    validator: (value) => value!.isEmpty ? 'Digite uma hora' : null,
+                    validator: (value) =>
+                    value!.isEmpty ? 'Digite uma hora' : null,
                     keyboardType: TextInputType.datetime,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<Empresa>(
-                    value: selectedEmpresa,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedEmpresa = value;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Selecione a Empresa',
-                      labelStyle: TextStyle(color: Colors.white),
-                      filled: true,
-                      fillColor: Colors.black12,
-                    ),
-                    items: empresas.map((empresa) {
-                      return DropdownMenuItem(
-                        value: empresa,
-                        child: Text(empresa.nome),
-                      );
-                    }).toList(),
-                    validator: (value) => value == null ? 'Selecione uma empresa' : null,
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<Cliente>(
@@ -164,7 +139,8 @@ class _EditFormScreenState extends State<EditFormScreen> {
                         child: Text(cliente.nome),
                       );
                     }).toList(),
-                    validator: (value) => value == null ? 'Selecione um cliente' : null,
+                    validator: (value) =>
+                    value == null ? 'Selecione um cliente' : null,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
