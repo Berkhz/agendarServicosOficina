@@ -17,14 +17,20 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
 
   final ApiService _apiService = ApiService();
 
+  int _generateUniqueId() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {
+        int clienteId = _generateUniqueId();
+
         Cliente cliente = Cliente(
           nome: _nomeController.text,
           telefone: _telefoneController.text,
           email: _emailController.text,
-          id: null,
+          id: clienteId,
         );
 
         bool success = await _apiService.addCliente(cliente);
