@@ -59,7 +59,12 @@ class ApiService {
       Uri.parse('$baseUrl/servicos/$id'),
     );
 
-    return response.statusCode == 200;
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else {
+      print('Erro ao excluir serviço: ${response.body}');
+      return false;
+    }
   }
 
   Future<bool> addCliente(Cliente cliente) async {
@@ -68,6 +73,7 @@ class ApiService {
         Uri.parse('$baseUrl/clientes'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
+          'id': cliente.id,
           'nome': cliente.nome,
           'telefone': cliente.telefone,
           'email': cliente.email,

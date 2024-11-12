@@ -52,10 +52,14 @@ class _ServicoFormScreenState extends State<ServicoFormScreen> {
     }
   }
 
+  int _generateUniqueId() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
   void _saveForm() async {
     if (_formKey.currentState!.validate() && _clienteId != null) {
       final novoServico = Servico(
-        id: 0,
+        id: _generateUniqueId(),
         tipo: tipoController.text,
         data: dataController.text,
         hora: horaController.text,
@@ -81,7 +85,7 @@ class _ServicoFormScreenState extends State<ServicoFormScreen> {
       appBar: AppBar(title: const Text('Adicionar Serviço')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(  // Adicionando SingleChildScrollView
+        child: SingleChildScrollView(
           child: Form(
             key: _formKey,
             child: Column(

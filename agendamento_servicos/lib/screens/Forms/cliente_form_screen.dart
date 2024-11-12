@@ -27,10 +27,10 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
         int clienteId = _generateUniqueId();
 
         Cliente cliente = Cliente(
+          id: clienteId,
           nome: _nomeController.text,
           telefone: _telefoneController.text,
           email: _emailController.text,
-          id: clienteId,
         );
 
         bool success = await _apiService.addCliente(cliente);
